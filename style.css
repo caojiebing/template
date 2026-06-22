@@ -1,0 +1,263 @@
+:root {
+    /* A4 landscape dimensions: 297mm × 210mm */
+    --page-width: 297mm;
+    --page-height: 210mm;
+    --spread-width: 594mm;
+    --page-margin: 12mm;
+    --column-width: 87mm;
+    --column-gap: 6mm;
+    --primary-color: #C9A961;
+    --title-color: #000000;
+    --text-color: #2B2B2B;
+    --divider-color: #8B6F3A;
+    --header-line-color: #C9A961;
+    --font-family-serif: "SimSun", "STSong", "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", serif;
+    --font-family-sans: "Microsoft YaHei", "PingFang SC", "Noto Sans CJK SC", sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    background-color: #F0F0F0;
+    font-family: var(--font-family-serif);
+}
+
+body {
+    color: var(--text-color);
+    line-height: 1.5;
+    padding: 20px 0;
+}
+
+.spread-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+
+.spread-divider {
+    width: 90%;
+    max-width: 700mm;
+    height: 2px;
+    background: linear-gradient(to right, transparent, #888 20%, #888 80%, transparent);
+    margin: 8mm 0;
+    position: relative;
+}
+
+.spread-divider::after {
+    content: "◆";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #F0F0F0;
+    color: #888;
+    padding: 0 10px;
+    font-size: 12px;
+}
+
+.spread {
+    width: var(--spread-width);
+    height: var(--page-height);
+    background-color: #FFFFFF;
+    display: flex;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.page {
+    width: var(--page-width);
+    height: var(--page-height);
+    background-color: #FFFFFF;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--page-margin);
+    border-right: 1px dashed #DDD;
+}
+
+.page:last-child {
+    border-right: none;
+}
+
+.page-header {
+    margin-bottom: 4mm;
+}
+
+.header-line {
+    height: 0.8mm;
+    background-color: var(--header-line-color);
+    width: 100%;
+}
+
+.header-title-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3mm;
+    padding: 2mm 0;
+}
+
+.title-dots {
+    display: flex;
+    gap: 1mm;
+}
+
+.dot {
+    width: 1.5mm;
+    height: 1.5mm;
+    background-color: var(--primary-color);
+    border-radius: 50%;
+}
+
+.column-title {
+    font-family: var(--font-family-serif);
+    font-size: 7mm;
+    font-weight: bold;
+    color: var(--title-color);
+    letter-spacing: 4mm;
+}
+
+.page-content {
+    flex: 1;
+    /* 使用CSS columns实现严格的三列布局 */
+    column-count: 3;
+    column-gap: var(--column-gap);
+    column-rule: 0.5mm solid var(--divider-color);
+    column-fill: auto;
+}
+
+.article-card {
+    break-inside: avoid;
+    margin-bottom: 3mm;
+    padding-bottom: 3mm;
+    border-bottom: 0.3mm solid var(--divider-color);
+}
+
+.article-card:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.article-title {
+    font-family: var(--font-family-serif);
+    font-size: 3.4mm;
+    font-weight: bold;
+    color: var(--title-color);
+    margin-bottom: 1.5mm;
+    line-height: 1.35;
+    text-align: justify;
+}
+
+.article-content {
+    font-family: var(--font-family-serif);
+    font-size: 2.8mm;
+    color: var(--text-color);
+    line-height: 1.55;
+    text-align: justify;
+    margin-bottom: 1.5mm;
+}
+
+.article-image-wrapper {
+    margin-top: 1.5mm;
+}
+
+.article-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 25mm;
+    object-fit: cover;
+    border: 0.2mm solid #DDD;
+}
+
+.page-footer {
+    text-align: center;
+    margin-top: 2mm;
+    padding-top: 1.5mm;
+    border-top: 0.5mm solid var(--primary-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--font-family-sans);
+    font-size: 3mm;
+    color: #666;
+}
+
+.page-footer-left, .page-footer-right {
+    flex: 1;
+}
+
+.page-footer-center {
+    flex: 1;
+    text-align: center;
+}
+
+.page-footer-left {
+    text-align: left;
+}
+
+.page-footer-right {
+    text-align: right;
+}
+
+.loading {
+    font-size: 4mm;
+    color: #666;
+    text-align: center;
+    padding: 20mm;
+    font-family: var(--font-family-sans);
+}
+
+/* Print styles */
+@media print {
+    html, body {
+        background-color: #FFFFFF;
+        padding: 0;
+    }
+
+    .spread {
+        box-shadow: none;
+        page-break-after: always;
+        margin: 0;
+    }
+
+    .spread-divider {
+        display: none;
+    }
+
+    .spread:last-child {
+        page-break-after: auto;
+    }
+}
+
+/* Responsive for screen preview */
+@media screen and (max-width: 1200px) {
+    .spread {
+        transform: scale(0.7);
+        transform-origin: top center;
+        margin-bottom: -30%;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .spread {
+        transform: scale(0.5);
+        transform-origin: top center;
+        margin-bottom: -50%;
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .spread {
+        transform: scale(0.35);
+        transform-origin: top center;
+        margin-bottom: -65%;
+    }
+}
