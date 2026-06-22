@@ -87,9 +87,9 @@ function createFooter(pageNum) {
     return footer;
 }
 
-function createPage(side, pageNum) {
+function createPage(pageNum) {
     const page = document.createElement('div');
-    page.className = 'page ' + (side === 'left' ? 'page-left' : 'page-right');
+    page.className = 'page';
 
     page.appendChild(createHeader());
 
@@ -106,121 +106,45 @@ function renderSpreads(articles) {
     const spreadContainer = document.getElementById('spreadContainer');
     spreadContainer.innerHTML = '';
 
-    // Measure approximate article heights using a temporary container
-    const measureContainer = document.createElement('div');
-    measureContainer.style.cssText = `
-        position: absolute;
-        visibility: hidden;
-        width: ${getColumnWidth()}px;
-        font-family: ${getComputedStyle(document.body).fontFamily};
-    `;
-    document.body.appendChild(measureContainer);
+    // 每页预估可容纳的文章数量（A4高度有限，实际测试调整）
+    const articlesPerPage = 12;
 
-    const articleHeights = articles.map(article => {
-        const articleEl = createArticleElement(article);
-        measureContainer.appendChild(articleEl);
-        const height = articleEl.offsetHeight;
-        articleEl.remove();
-        return height;
-    });
-
-    document.body.removeChild(measureContainer);
-
-    // Calculate the available content height per page
-    const availableHeight = getAvailableContentHeight();
-    // 6 columns per spread (2 pages × 3 columns)
-    const totalColumnsPerSpread = 6;
-    const heightPerColumn = availableHeight;
-    // Reserve some padding between articles
-    const articleGap = 6;
-
-    // Pack articles into spreads using a height-balancing algorithm
-    // We aim to distribute articles so each column has roughly equal height
-    const spreads = [];
-    let currentSpread = { left: [], right: [], heights: [0, 0, 0, 0, 0, 0] };
-    let totalCurrentHeight = 0;
-    const maxSpreadHeight = heightPerColumn; // Each column has this max height
-
-    articles.forEach((article, index) => {
-        const articleHeight = articleHeights[index] + articleGap;
-        // Find the column with the smallest current height
-        let minColIndex = 0;
-        for (let i = 1; i < 6; i++) {
-            if (currentSpread.heights[i] < currentSpread.heights[minColIndex]) {
-                minColIndex = i;
-            }
-        }
-
-        // Check if adding this article to the shortest column would overflow
-        const columnHeights = [...currentSpread.heights];
-        columnHeights[minColIndex] += articleHeight;
-
-        // If all columns are at risk of overflow, start a new spread
-        if (columnHeights[minColIndex] > maxSpreadHeight && Math.min(...currentSpread.heights) > maxSpreadHeight * 0.6) {
-            spreads.push(currentSpread);
-            currentSpread = { left: [], right: [], heights: [0, 0, 0, 0, 0, 0] };
-            currentSpread.heights[minColIndex] = articleHeight;
-            if (minColIndex < 3) {
-                currentSpread.left.push(article);
-            } else {
-                currentSpread.right.push(article);
-            }
-        } else {
-            currentSpread.heights[minColIndex] = columnHeights[minColIndex];
-            if (minColIndex < 3) {
-                currentSpread.left.push(article);
-            } else {
-                currentSpread.right.push(article);
-            }
-        }
-    });
-
-    if (currentSpread.left.length > 0 || currentSpread.right.length > 0) {
-        spreads.push(currentSpread);
+    // 将文章分组为页面
+    const pages = [];
+    for (let i = 0; i < articles.length; i += articlesPerPage) {
+        pages.push(articles.slice(i, i + articlesPerPage));
     }
 
-    // Render spreads
-    let pageNum = 1;
-    spreads.forEach((spread, spreadIndex) => {
-        const spreadEl = document.createElement('div');
-        spreadEl.className = 'spread';
+    // 将两个页面组成一个spread（对开页）
+    for (let i = 0; i < pages.length; i += 2) {
+        const spread = document.createElement('div');
+        spread.className = 'spread';
 
-        const leftPage = createPage('left', pageNum);
-        const rightPage = createPage('right', pageNum + 1);
+        // 左页
+        const leftPage = createPage(i + 1);
+        if (pages[i]) {
+            pages[i].forEach(article => {
+                leftPage.content.appendChild(createArticleElement(article));
+            });
+        }
+        spread.appendChild(leftPage.page);
 
-        spread.left.forEach(article => {
-            leftPage.content.appendChild(createArticleElement(article));
-        });
+        // 右页
+        const rightPage = createPage(i + 2);
+        if (pages[i + 1]) {
+            pages[i + 1].forEach(article => {
+                rightPage.content.appendChild(createArticleElement(article));
+            });
+        }
+        spread.appendChild(rightPage.page);
 
-        spread.right.forEach(article => {
-            rightPage.content.appendChild(createArticleElement(article));
-        });
+        spreadContainer.appendChild(spread);
 
-        spreadEl.appendChild(leftPage.page);
-        spreadEl.appendChild(rightPage.page);
-
-        spreadContainer.appendChild(spreadEl);
-
-        if (spreadIndex < spreads.length - 1) {
+        // 跨页之间添加分割线
+        if (i + 2 < pages.length) {
             const divider = document.createElement('div');
             divider.className = 'spread-divider';
             spreadContainer.appendChild(divider);
         }
-
-        pageNum += 2;
-    });
-}
-
-function getColumnWidth() {
-    // A4 landscape page width minus margins and gaps, divided by 3 columns
-    // 297mm = 1122.5px (at 96dpi), margin 12mm × 2 = 24mm, gap 6mm × 2 = 12mm
-    // (297 - 24 - 12) / 3 = 87mm per column
-    return 87 * 3.7795275591; // convert mm to px
-}
-
-function getAvailableContentHeight() {
-    // A4 landscape height 210mm minus margins (12mm × 2 = 24mm)
-    // minus header (~14mm) minus footer (~8mm)
-    // = 210 - 24 - 14 - 8 = 164mm
-    return 164 * 3.7795275591; // convert mm to px
+    }
 }

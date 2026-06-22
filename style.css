@@ -82,13 +82,7 @@ body {
     padding: var(--page-margin);
 }
 
-.page-left {
-    border-right: 1px dashed #DDD;
-}
 
-.page-right {
-    border-left: 1px dashed #DDD;
-}
 
 .page-header {
     margin-bottom: 4mm;
