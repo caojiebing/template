@@ -4,10 +4,6 @@
     --page-height: 210mm;
     --spread-width: 594mm;
     --page-margin: 12mm;
-    --column-count: 3;
-    --column-gap: 6mm;
-    --column-rule-width: 0.5mm;
-    --column-rule-color: #B8A060;
     --primary-color: #C9A961;
     --title-color: #000000;
     --text-color: #2B2B2B;
@@ -80,9 +76,12 @@ body {
     display: flex;
     flex-direction: column;
     padding: var(--page-margin);
+    border-right: 1px dashed #DDD;
 }
 
-
+.page:last-child {
+    border-right: none;
+}
 
 .page-header {
     margin-bottom: 4mm;
@@ -125,15 +124,23 @@ body {
 .page-content {
     flex: 1;
     display: flex;
-    column-count: var(--column-count);
-    column-gap: var(--column-gap);
-    column-rule: var(--column-rule-width) solid var(--column-rule-color);
-    column-fill: auto;
-    overflow: hidden;
+    gap: 6mm;
+}
+
+.article-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-right: 0.5mm solid var(--divider-color);
+    padding-right: 6mm;
+}
+
+.article-column:last-child {
+    border-right: none;
+    padding-right: 0;
 }
 
 .article-card {
-    break-inside: avoid;
     margin-bottom: 3mm;
     padding-bottom: 3mm;
     border-bottom: 0.3mm solid var(--divider-color);
@@ -166,7 +173,6 @@ body {
 
 .article-image-wrapper {
     margin-top: 1.5mm;
-    break-inside: avoid;
 }
 
 .article-image {
