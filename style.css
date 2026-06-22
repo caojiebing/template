@@ -4,6 +4,8 @@
     --page-height: 210mm;
     --spread-width: 594mm;
     --page-margin: 12mm;
+    --column-width: 87mm;
+    --column-gap: 6mm;
     --primary-color: #C9A961;
     --title-color: #000000;
     --text-color: #2B2B2B;
@@ -123,24 +125,15 @@ body {
 
 .page-content {
     flex: 1;
-    display: flex;
-    gap: 6mm;
-}
-
-.article-column {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    border-right: 0.5mm solid var(--divider-color);
-    padding-right: 6mm;
-}
-
-.article-column:last-child {
-    border-right: none;
-    padding-right: 0;
+    /* 使用CSS columns实现严格的三列布局 */
+    column-count: 3;
+    column-gap: var(--column-gap);
+    column-rule: 0.5mm solid var(--divider-color);
+    column-fill: auto;
 }
 
 .article-card {
+    break-inside: avoid;
     margin-bottom: 3mm;
     padding-bottom: 3mm;
     border-bottom: 0.3mm solid var(--divider-color);
@@ -179,7 +172,7 @@ body {
     width: 100%;
     height: auto;
     display: block;
-    max-height: 28mm;
+    max-height: 25mm;
     object-fit: cover;
     border: 0.2mm solid #DDD;
 }

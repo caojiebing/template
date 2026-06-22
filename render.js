@@ -32,6 +32,7 @@ function createArticleElement(article) {
     articleCard.appendChild(titleElement);
     articleCard.appendChild(contentElement);
 
+    // 添加图片
     if (article.image) {
         const imageWrapper = document.createElement('div');
         imageWrapper.className = 'article-image-wrapper';
@@ -87,12 +88,6 @@ function createFooter(pageNum) {
     return footer;
 }
 
-function createColumn() {
-    const column = document.createElement('div');
-    column.className = 'article-column';
-    return column;
-}
-
 function createPage(pageNum) {
     const page = document.createElement('div');
     page.className = 'page';
@@ -101,78 +96,56 @@ function createPage(pageNum) {
 
     const content = document.createElement('div');
     content.className = 'page-content';
-
-    // Create 3 columns for this page
-    for (let i = 0; i < 3; i++) {
-        content.appendChild(createColumn());
-    }
-
     page.appendChild(content);
+
     page.appendChild(createFooter(pageNum));
 
-    return { page, content, columns: content.querySelectorAll('.article-column') };
+    return { page, content };
 }
 
 function renderSpreads(articles) {
     const spreadContainer = document.getElementById('spreadContainer');
     spreadContainer.innerHTML = '';
 
-    // Distribute articles across columns evenly
-    // Each spread has 2 pages × 3 columns = 6 columns
-    // Each column gets articles sequentially
-    const columnsPerSpread = 6;
-    const totalColumns = Math.ceil(articles.length / 3); // 3 articles per column
+    // 每页放置的文章数量（CSS columns会自动在三列间分配）
+    const articlesPerPage = 12;
 
-    // Group articles into column groups of 3
-    // Each group of 3 articles goes to one column
-    const columnGroups = [];
-    for (let i = 0; i < articles.length; i += 3) {
-        columnGroups.push(articles.slice(i, i + 3));
+    // 将文章分组为页面
+    const pages = [];
+    for (let i = 0; i < articles.length; i += articlesPerPage) {
+        pages.push(articles.slice(i, i + articlesPerPage));
     }
 
-    // Group columns into spreads (6 columns per spread)
-    const spreadGroups = [];
-    for (let i = 0; i < columnGroups.length; i += columnsPerSpread) {
-        spreadGroups.push(columnGroups.slice(i, i + columnsPerSpread));
-    }
-
-    // Render spreads
-    spreadGroups.forEach((spreadData, spreadIndex) => {
+    // 将两个页面组成一个spread（对开页）
+    for (let i = 0; i < pages.length; i += 2) {
         const spread = document.createElement('div');
         spread.className = 'spread';
 
-        // Left page
-        const leftPage = createPage(spreadIndex * 2 + 1);
-        // Right page
-        const rightPage = createPage(spreadIndex * 2 + 2);
-
-        // Fill left page columns (first 3 column groups)
-        spreadData.slice(0, 3).forEach((group, colIndex) => {
-            if (colIndex < leftPage.columns.length) {
-                group.forEach(article => {
-                    leftPage.columns[colIndex].appendChild(createArticleElement(article));
-                });
-            }
-        });
-
-        // Fill right page columns (next 3 column groups)
-        spreadData.slice(3, 6).forEach((group, colIndex) => {
-            if (colIndex < rightPage.columns.length) {
-                group.forEach(article => {
-                    rightPage.columns[colIndex].appendChild(createArticleElement(article));
-                });
-            }
-        });
-
+        // 左页
+        const leftPage = createPage(i + 1);
+        if (pages[i]) {
+            pages[i].forEach(article => {
+                leftPage.content.appendChild(createArticleElement(article));
+            });
+        }
         spread.appendChild(leftPage.page);
+
+        // 右页
+        const rightPage = createPage(i + 2);
+        if (pages[i + 1]) {
+            pages[i + 1].forEach(article => {
+                rightPage.content.appendChild(createArticleElement(article));
+            });
+        }
         spread.appendChild(rightPage.page);
+
         spreadContainer.appendChild(spread);
 
-        // Add divider between spreads
-        if (spreadIndex < spreadGroups.length - 1) {
+        // 跨页之间添加分割线
+        if (i + 2 < pages.length) {
             const divider = document.createElement('div');
             divider.className = 'spread-divider';
             spreadContainer.appendChild(divider);
         }
-    });
+    }
 }
