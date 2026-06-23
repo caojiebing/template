@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天翼客服杂志</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+            background: #e8e8e8;
+            color: #222;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+
+        .magazine-page {
+            width: 1000px;
+            min-height: 1400px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 50px 60px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .brand-header {
+            text-align: center;
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            border-bottom: 3px double #c0392b;
+        }
+
+        .brand-diamonds {
+            display: block;
+            color: #c0392b;
+            font-size: 10px;
+            letter-spacing: 2px;
+            line-height: 1.2;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .brand-name {
+            font-size: 32px;
+            font-weight: bold;
+            color: #c0392b;
+            letter-spacing: 8px;
+            margin: 8px 0;
+        }
+
+        .brand-subtitle {
+            font-size: 12px;
+            color: #666;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .page-number {
+            position: absolute;
+            bottom: 30px;
+            right: 60px;
+            font-size: 14px;
+            color: #999;
+        }
+
+        .articles-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-3-col { grid-template-columns: repeat(3, 1fr); }
+        .grid-2-col { grid-template-columns: repeat(2, 1fr); }
+        .grid-1-col { grid-template-columns: 1fr; }
+
+        .article-card {
+            padding: 16px;
+            border-left: 3px solid #c0392b;
+            background: #fafafa;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .article-card:hover {
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .article-category {
+            display: inline-block;
+            font-size: 11px;
+            color: #fff;
+            background: #c0392b;
+            padding: 2px 10px;
+            border-radius: 2px;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .article-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: #222;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+
+        .article-content {
+            font-size: 13px;
+            color: #444;
+            line-height: 1.9;
+            text-align: justify;
+            text-indent: 2em;
+        }
+
+        .article-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+            margin: 12px 0;
+            border-radius: 3px;
+        }
+
+        .featured-article {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #fefefe 0%, #f5f5f5 100%);
+            border: 1px solid #eee;
+            border-left: 4px solid #c0392b;
+        }
+
+        .featured-article .article-image {
+            width: 300px;
+            height: 200px;
+            flex-shrink: 0;
+            margin: 0;
+        }
+
+        .featured-article .article-body { flex: 1; }
+        .featured-article .article-title { font-size: 22px; }
+
+        .section-divider {
+            grid-column: 1 / -1;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #ddd, transparent);
+            margin: 10px 0;
+        }
+
+        @media (max-width: 1100px) {
+            .magazine-page { width: 95%; padding: 30px 40px; }
+            .grid-3-col { grid-template-columns: repeat(2, 1fr); }
+            .featured-article { flex-direction: column; }
+            .featured-article .article-image { width: 100%; height: 180px; }
+        }
+
+        @media (max-width: 768px) {
+            .magazine-page { width: 100%; margin: 0; padding: 20px; box-shadow: none; }
+            .grid-3-col, .grid-2-col { grid-template-columns: 1fr; }
+            .brand-name { font-size: 24px; letter-spacing: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="magazine-container"></div>
+
+    <script>
+        async function loadMagazine() {
+            try {
+                const response = await fetch('magazine-data.json');
+                const data = await response.json();
+                renderMagazine(data.magazine);
+            } catch (error) {
+                console.error('加载杂志数据失败:', error);
+                document.getElementById('magazine-container').innerHTML =
+                    '<p style="text-align:center;color:#c0392b;padding:100px;">数据加载失败，请检查 magazine-data.json 文件是否存在</p>';
+            }
+        }
+
+        function renderMagazine(magazineData) {
+            const container = document.getElementById('magazine-container');
+            let html = '';
+
+            magazineData.pages.forEach(function(page) {
+                html += '<div class="magazine-page">';
+
+                html += '<div class="brand-header">';
+                html += '<span class="brand-diamonds">' + '\u25C6 \u25C7 '.repeat(40) + '</span>';
+                html += '<div class="brand-name">' + magazineData.brand + '</div>';
+                html += '<div class="brand-subtitle">' + magazineData.brand_en + ' \u00B7 ' + magazineData.issue + '</div>';
+                html += '</div>';
+
+                var articleCount = page.articles.length;
+                var gridClass = 'grid-3-col';
+                if (articleCount === 1) gridClass = 'grid-1-col';
+                else if (articleCount === 2) gridClass = 'grid-2-col';
+
+                html += '<div class="articles-grid ' + gridClass + '">';
+
+                page.articles.forEach(function(article, index) {
+                    if (index === 0 && articleCount >= 3) {
+                        html += renderFeaturedArticle(article);
+                    } else {
+                        html += renderArticleCard(article);
+                    }
+                });
+
+                html += '</div>';
+                html += '<div class="page-number">' + page.page_number + '</div>';
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderFeaturedArticle(article) {
+            return '<div class="featured-article">' +
+                '<img src="' + article.image + '" alt="' + article.title + '" class="article-image" loading="lazy">' +
+                '<div class="article-body">' +
+                '<span class="article-category">' + article.category + '</span>' +
+                '<h3 class="article-title">' + article.title + '</h3>' +
+                '<p class="article-content">' + article.content + '</p>' +
+                '</div></div><div class="section-divider"></div>';
+        }
+
+        function renderArticleCard(article) {
+            return '<div class="article-card">' +
+                '<span class="article-category">' + article.category + '</span>' +
+                '<h3 class="article-title">' + article.title + '</h3>' +
+                '<img src="' + article.image + '" alt="' + article.title + '" class="article-image" loading="lazy">' +
+                '<p class="article-content">' + article.content + '</p>' +
+                '</div>';
+        }
+
+        document.addEventListener('DOMContentLoaded', loadMagazine);
+    </script>
+</body>
+</html>
